@@ -166,4 +166,42 @@ public class RedisServer {
         }
     }
 
+    /**
+     * 版本 5
+     * 1. 先查看是否可用锁
+     * 2. 若可用 则占用锁
+     * 3. 给锁设置过期时间
+     * 这三个步骤利用 lua 脚本保证"原子性"(相比于不使用事务)
+     * 4. 利用 lua 脚本释放锁
+     * 5. 启动一个逻辑上的守护线程, 给锁续期
+     * 6. 如果没有获取到锁 则自旋等待
+     */
+    public void version5() throws InterruptedException {
+
+        String key = "lock";
+        String value = Thread.currentThread().getName();
+
+        for(;;){
+            // 自旋 去获取锁
+            Long result = lockLua(key, value);
+            if (result == 0){
+                break;
+            }
+            Thread.sleep(100);
+        }
+
+        // 守护线程
+        Thread refreshLock = new RefreshLock(key, 10L, 3, 3L, redisTemplate, refreshRedisScript);
+        try{
+            refreshLock.start();
+            // 业务操作
+            System.out.println("执行业务操作...");
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            unLockLua(key, value);
+            refreshLock.interrupt();
+        }
+    }
+
 }
