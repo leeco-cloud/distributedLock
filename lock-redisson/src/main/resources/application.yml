@@ -1,0 +1,11 @@
+spring:
+  # redis
+  redis:
+    host: localhost
+    port: 6379
+    redisson:
+      # 配置单点模式
+      config: classpath:redisson-single.yml
+
+server:
+  port: 8082
