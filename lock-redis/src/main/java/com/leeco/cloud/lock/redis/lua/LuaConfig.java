@@ -19,11 +19,29 @@ import org.springframework.scripting.support.ResourceScriptSource;
 public class LuaConfig {
 
     @Bean
-    public DefaultRedisScript<Long> defaultRedisScript(){
+    public DefaultRedisScript<Long> lockRedisScript(){
         ClassPathResource resource = new ClassPathResource("lock.lua");
         DefaultRedisScript<Long> script = new DefaultRedisScript<>();
         script.setScriptSource(new ResourceScriptSource(resource));
         script.setResultType(Long.class);
+        return script;
+    }
+
+    @Bean
+    public DefaultRedisScript<Boolean> unLockRedisScript(){
+        ClassPathResource resource = new ClassPathResource("unLock.lua");
+        DefaultRedisScript<Boolean> script = new DefaultRedisScript<>();
+        script.setScriptSource(new ResourceScriptSource(resource));
+        script.setResultType(Boolean.class);
+        return script;
+    }
+
+    @Bean
+    public DefaultRedisScript<Boolean> refreshRedisScript(){
+        ClassPathResource resource = new ClassPathResource("refreshLock.lua");
+        DefaultRedisScript<Boolean> script = new DefaultRedisScript<>();
+        script.setScriptSource(new ResourceScriptSource(resource));
+        script.setResultType(Boolean.class);
         return script;
     }
 
