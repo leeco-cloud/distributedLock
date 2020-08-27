@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: lock-redis
+  datasource:
+    username: root
+    driver-class-name: com.mysql.jdbc.Driver
+    password: root
+    url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+
+server:
+  port: 8083
+
