@@ -2,6 +2,7 @@ package com.leeco.cloud.lock.redis.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
@@ -23,29 +24,29 @@ public class RedisServer {
 
     private final RedisTemplate redisTemplate;
 
-    private final DefaultRedisScript<Long> lockRedisScript;
+    @Autowired
+    private DefaultRedisScript<Boolean> lockRedisScript;
 
-    private final DefaultRedisScript<Boolean> unLockRedisScript;
+    @Autowired
+    private DefaultRedisScript<Boolean> unLockRedisScript;
 
-    private final DefaultRedisScript<Boolean> refreshRedisScript;
+    @Autowired
+    private DefaultRedisScript<Boolean> refreshRedisScript;
 
-    public RedisServer(RedisTemplate redisTemplate, DefaultRedisScript<Long> lockRedisScript, DefaultRedisScript<Boolean> unLockRedisScript, DefaultRedisScript<Boolean> refreshRedisScript) {
+    public RedisServer(RedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.lockRedisScript = lockRedisScript;
-        this.unLockRedisScript = unLockRedisScript;
-        this.refreshRedisScript = refreshRedisScript;
     }
 
     /**
      * 执行上锁的lua脚本
      */
-    private Long lockLua(String key, String value){
+    private Boolean lockLua(String key, String value){
         try{
             List<String> keys = Collections.singletonList(key);
-            return (Long) redisTemplate.execute(lockRedisScript, keys, value, 10);
+            return (Boolean) redisTemplate.execute(lockRedisScript, keys, value, 10);
         }catch (Exception e){
             logger.error(e.getMessage(),e);
-            return -1L;
+            return false;
         }
     }
 
@@ -119,8 +120,8 @@ public class RedisServer {
         String key = "lock";
         String value = Thread.currentThread().getName();
 
-        Long result = lockLua(key, value);
-        if (result == 0){
+        Boolean result = lockLua(key, value);
+        if (result){
             // 业务操作
             try{
                 System.out.println("执行业务操作...");
@@ -146,8 +147,8 @@ public class RedisServer {
         String key = "lock";
         String value = Thread.currentThread().getName();
 
-        Long result = lockLua(key, value);
-        if (result == 0){
+        Boolean result = lockLua(key, value);
+        if (result){
 
             /*
             起一个线程 给锁续期
@@ -183,8 +184,8 @@ public class RedisServer {
 
         for(;;){
             // 自旋 去获取锁
-            Long result = lockLua(key, value);
-            if (result == 0){
+            Boolean result = lockLua(key, value);
+            if (result){
                 break;
             }
             Thread.sleep(100);
@@ -195,6 +196,7 @@ public class RedisServer {
         try{
             refreshLock.start();
             // 业务操作
+            Thread.sleep(20000L);
             System.out.println("执行业务操作...");
         }catch (Exception e){
             e.printStackTrace();

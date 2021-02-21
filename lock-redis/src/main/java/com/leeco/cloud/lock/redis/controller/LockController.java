@@ -19,8 +19,8 @@ public class LockController {
     }
 
     @GetMapping("/lock")
-    public void lock(){
-        redisServer.version3();
+    public void lock() throws InterruptedException {
+        redisServer.version5();
     }
 
 }

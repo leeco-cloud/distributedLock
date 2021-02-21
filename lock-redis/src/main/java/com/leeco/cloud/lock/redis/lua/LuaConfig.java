@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scripting.support.ResourceScriptSource;
+import org.springframework.scripting.support.StaticScriptSource;
 
 /**
  * @author liuqiang@ourdocker.cn
@@ -19,13 +20,26 @@ import org.springframework.scripting.support.ResourceScriptSource;
 public class LuaConfig {
 
     @Bean
-    public DefaultRedisScript<Long> lockRedisScript(){
+    public DefaultRedisScript<Boolean> lockRedisScript(){
         ClassPathResource resource = new ClassPathResource("lock.lua");
-        DefaultRedisScript<Long> script = new DefaultRedisScript<>();
+        DefaultRedisScript<Boolean> script = new DefaultRedisScript<>();
         script.setScriptSource(new ResourceScriptSource(resource));
-        script.setResultType(Long.class);
+        script.setResultType(Boolean.class);
         return script;
     }
+
+//    @Bean
+//    public DefaultRedisScript<Boolean> lockRedisScript(){
+//        DefaultRedisScript<Boolean> script = new DefaultRedisScript<>();
+//        script.setScriptSource(new StaticScriptSource("if (redis.call('exists', KEYS[1]) == 0) then\n" +
+//                "    redis.call('set', KEYS[1], ARGV[1]);\n" +
+//                "    redis.call('expire', KEYS[1], ARGV[2]);\n" +
+//                "    return true;\n" +
+//                "end;\n" +
+//                "return false;"));
+//        script.setResultType(Boolean.class);
+//        return script;
+//    }
 
     @Bean
     public DefaultRedisScript<Boolean> unLockRedisScript(){
@@ -36,6 +50,18 @@ public class LuaConfig {
         return script;
     }
 
+//    @Bean
+//    public DefaultRedisScript<Boolean> unLockRedisScript(){
+//        DefaultRedisScript<Boolean> script = new DefaultRedisScript<>();
+//        script.setScriptSource(new StaticScriptSource("if (redis.call('exists', KEYS[1]) == 1) then\n" +
+//                "    redis.call('del', KEYS[1]);\n" +
+//                "    return true;\n" +
+//                "end;\n" +
+//                "return false;"));
+//        script.setResultType(Boolean.class);
+//        return script;
+//    }
+
     @Bean
     public DefaultRedisScript<Boolean> refreshRedisScript(){
         ClassPathResource resource = new ClassPathResource("refreshLock.lua");
@@ -44,6 +70,18 @@ public class LuaConfig {
         script.setResultType(Boolean.class);
         return script;
     }
+
+//    @Bean
+//    public DefaultRedisScript<Boolean> refreshRedisScript(){
+//        DefaultRedisScript<Boolean> script = new DefaultRedisScript<>();
+//        script.setScriptSource(new StaticScriptSource("if (redis.call('ttl', KEYS[1]) < tonumber(ARGV[2])) then\n" +
+//                "    redis.call('expire', KEYS[1], ARGV[1]);\n" +
+//                "    return true;\n" +
+//                "end;\n" +
+//                "return false;"));
+//        script.setResultType(Boolean.class);
+//        return script;
+//    }
 
     /**
      * 设置 redisTemplate 的序列化设置
