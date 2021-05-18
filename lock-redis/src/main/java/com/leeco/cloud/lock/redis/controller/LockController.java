@@ -20,7 +20,7 @@ public class LockController {
 
     @GetMapping("/lock")
     public void lock() throws InterruptedException {
-        redisServer.version5();
+        redisServer.demo();
     }
 
 }
