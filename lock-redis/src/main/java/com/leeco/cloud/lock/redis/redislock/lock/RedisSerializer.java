@@ -12,7 +12,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * redis序列化
- * @author liuqiang@ourdocker.cn
+ * @author liuqiang-068
  */
 @Configuration
 public class RedisSerializer {

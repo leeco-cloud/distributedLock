@@ -6,7 +6,7 @@ import org.springframework.aop.support.AbstractBeanFactoryPointcutAdvisor;
 
 /**
  * redis分布式锁的切面
- * @author liuqiang@ourdocker.cn
+ * @author liuqiang-068
  */
 public class RedisLockAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 

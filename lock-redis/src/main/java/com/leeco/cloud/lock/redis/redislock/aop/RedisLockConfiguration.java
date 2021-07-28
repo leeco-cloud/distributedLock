@@ -7,7 +7,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  * redis分布式锁配置类
- * @author liuqiang@ourdocker.cn
+ * @author liuqiang-068
  */
 @Configuration
 @ConditionalOnClass(RedisTemplate.class)

@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 /**
  * redis分布式锁切点
- * @author liuqiang@ourdocker.cn
+ * @author liuqiang-068
  */
 public class RedisLockPointCut extends StaticMethodMatcherPointcut {
 
