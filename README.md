@@ -9,11 +9,9 @@ redis锁架构图：
     
 ```java
     /*
-    * rollBackFor:表示异常回滚的异常类
-    * openMysqlTransactional:是否开启mysql事务 等价于开启@Transactional注解 默认为false
     * reentrant:是否设置为可重入 默认为false
     */
-    @RedisLock(rollBackFor = RuntimeException.class,openMysqlTransactional = false,reentrant = false)
+    @RedisLock(reentrant = false)
     public void demo(){
         try {
             // ...业务逻辑
