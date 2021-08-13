@@ -10,10 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -49,18 +45,12 @@ public class RedisLockAdvice implements MethodInterceptor {
     @Autowired
     private TimeWheel timeWheel;
 
-    /** 事务管理器顶层接口 PlatformTransactionManager */
-    @Autowired
-    private PlatformTransactionManager platformTransactionManager;
-
-    /** 默认的事务定义 */
-    private final TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
-
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable{
         InetAddress ip4 = Inet4Address.getLocalHost();
         String hostIp = ip4.getHostAddress();
         Object result = null;
+        Exception exception = null;
         RedisLock annotation = invocation.getMethod().getAnnotation(RedisLock.class);
         String uniqueKey = invocation.getThis().getClass() + "::" + invocation.getMethod().getName();
         for(;;) {
@@ -68,30 +58,18 @@ public class RedisLockAdvice implements MethodInterceptor {
             if (redisLockRefreshDaemon == null){
                 continue;
             }
-            boolean exception = false;
-            TransactionStatus transaction = null;
-            // 判断是否开启事务
-            if (annotation.openMysqlTransactional()){
-                transaction = platformTransactionManager.getTransaction(transactionDefinition);
-            }
+            boolean exceptionState = false;
             try{
                 // 执行do
                 result = invocation.proceed();
             }catch (Exception e){
-                if (transaction != null && annotation.openMysqlTransactional()){
-                    // 回滚事务
-                    platformTransactionManager.rollback(transaction);
-                }
-                exception = true;
-            }
-            if (!exception && transaction != null && annotation.openMysqlTransactional()){
-                // 提交事务
-                platformTransactionManager.commit(transaction);
+                exceptionState = true;
+                exception = e;
             }
             // 执行结束 主动释放锁锁
             unLock(annotation,uniqueKey,hostIp,redisLockRefreshDaemon);
-            if (exception){
-                throw annotation.rollBackFor().newInstance();
+            if (exceptionState){
+                throw exception;
             }
             break;
         }
