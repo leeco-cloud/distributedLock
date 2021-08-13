@@ -14,7 +14,7 @@ public class RedisServer {
     /**
      * 将redis锁利用AOP封装成了注解型组件
      */
-    @RedisLock(rollBackFor = RuntimeException.class,openMysqlTransactional = false,reentrant = false)
+    @RedisLock(reentrant = false)
     public void demo(){
         try {
             Thread.sleep(10000);
