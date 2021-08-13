@@ -14,16 +14,6 @@ import java.lang.annotation.Target;
 public @interface RedisLock {
 
     /**
-     * 异常抛出异常类型
-     */
-    Class<? extends Throwable> rollBackFor();
-
-    /**
-     * 是否开启数据库事务 默认不开启
-     */
-    boolean openMysqlTransactional() default false;
-
-    /**
      * 是否可重入 默认不可重入
      */
     boolean reentrant() default false;
